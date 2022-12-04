@@ -1,11 +1,5 @@
 const fs = require('fs');
 
-// const PLAYS = {
-//     rock: ['A', 'X'],
-//     paper: ['B', 'Y'],
-//     scissors: ['C', 'Z'],
-// };
-
 const THEIRS = {
     A: 'A', // rock
     B: 'B', // paper
@@ -13,9 +7,9 @@ const THEIRS = {
 };
 
 const OURS = {
-    X: 'X', // rock
-    Y: 'Y', // paper
-    Z: 'Z', // scissors
+    X: 'X', // rock / lose
+    Y: 'Y', // paper / draw
+    Z: 'Z', // scissors / win
 };
 
 const PLAY_SCORES = {
@@ -30,34 +24,42 @@ const SCORES = {
     win: 6,
 };
 
-// rock > scissors
-// scissors > paper
-// paper > rock
-
-const isWin = (t, o) => {
-    // console.log('SWITCH ours is ', o === OURS.X, OURS.Y, OURS.Z);
+const toWin = (t, o) => {
     switch (true) {
-        case o === OURS.X: // ours === rock
-            return t === THEIRS.C; // theirs === scissors
-        case o === OURS.Y: // ours === paper
-            return t === THEIRS.A; // theirs === rock
-        case o === OURS.Z: // ours === scissors
-            return t === THEIRS.B; // theirs === paper
+        case t === THEIRS.A: // if theirs is rock, we need paper to win
+            return OURS.Y;
+        case t === THEIRS.B: // if theirs is paper, we need scissors to win
+            return OURS.Z;
+        case t === THEIRS.C: // if theirs is scissors, we need rock to win
+            return OURS.X;
         default:
-            return false;
+            return null;
     };
 };
 
-const isDraw = (t, o) => {
+const toDraw = (t, o) => {
     switch (true) {
-        case o === OURS.X:
-            return t === THEIRS.A;
-        case o === OURS.Y:
-            return t === THEIRS.B;
-        case o === OURS.Z:
-            return t === THEIRS.C;
+        case t === THEIRS.A:
+            return OURS.X;
+        case t === THEIRS.B:
+            return OURS.Y;
+        case t === THEIRS.C:
+            return OURS.Z;
         default:
-            return false;
+            return null;
+    };
+};
+
+const toLose = (t, o) => {
+    switch (true) {
+        case t === THEIRS.A:
+            return OURS.Z;
+        case t === THEIRS.B:
+            return OURS.X;
+        case t === THEIRS.C:
+            return OURS.Y;
+        default:
+            return null;
     };
 };
 
@@ -70,37 +72,60 @@ try {
     // calculate score per han
     let counter = 0;
     split.forEach((item) => {
+        let thisCount = 0;
         const [theirs, ours] = item.split(/\s+/);
 
-        const win = isWin(theirs, ours);
-        const draw = isDraw(theirs, ours);
+        const winPlay = toWin(theirs, ours);
+        const drawPlay = toDraw(theirs, ours);
+        const lossPlay = toLose(theirs, ours);
 
-        if (win) {
+        let play = null;
+
+        switch (true) {
+            case ours === OURS.X: // to lose
+                play = lossPlay;
+                break;
+            case ours === OURS.Y: // to draw
+                play = drawPlay;
+                break;
+            case ours === OURS.Z: // to win
+                play = winPlay;
+                break;
+            default:
+                break;
+        };
+
+        // scores for the hand played
+        if (play === OURS.Z) {
+            counter += PLAY_SCORES.scissors;
+        } else if (play === OURS.Y) {
+            counter += PLAY_SCORES.paper;
+        } else if (play === OURS.X) {
+            counter += PLAY_SCORES.rock;
+        }
+
+        // scores for winning
+        if (play === winPlay) {
             counter += SCORES.win;
-        } else if (draw) {
+        } else if (play === drawPlay) {
             counter += SCORES.draw;
         } else {
             counter += SCORES.loss;
         }
-
-        if (ours === OURS.X) {
-            counter += PLAY_SCORES.rock;
-        } else if (ours === OURS.Y) {
-            counter += PLAY_SCORES.paper;
-        } else {
-            counter += PLAY_SCORES.scissors;
-        }
+        
         // console.log({ 
         //     theirs,
         //     ours,
-        //     isWin: isWin(theirs, ours),
-        //     isDraw: isDraw(theirs, ours),
-        //     isLoss: !isWin(theirs, ours) && !isDraw(theirs, ours),
+        //     winPlay,
+        //     drawPlay,
+        //     lossPlay,
         //     counter,
+        //     thisCount,
+        //     play,
         // });
     });
 
-    console.log('Answer 1 is ', counter);
+    console.log('Answer 2 is ', counter);
      
 } catch (err) {
   console.error('Error! ', err);
