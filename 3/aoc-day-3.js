@@ -1,8 +1,14 @@
 const fs = require('fs');
+var _=require('lodash'); 
 
-const splitAt = (index, xs) => [xs.slice(0, index), xs.slice(index)];
-const getOverlap = (str1, str2) => (str1.match(new RegExp('[' + str2 + ']', 'g')) || [])[0];
+const getOverlap = (str1, str2) => (str1.match(new RegExp('[' + str2 + ']', 'g')) || []);
 const getPriority = letter => ALPHABET.indexOf(letter) + 1;
+
+let groupByN = (n, data) => {
+    let result = [];
+    for (let i = 0; i < data.length; i += n) result.push(data.slice(i, i + n));
+    return result;
+  };
 
 // a-z are 1-26
 // A-Z are 27-52
@@ -13,19 +19,16 @@ try {
     console.log('Success!');
     const split = data.split('\n');
 
-    // split sprint in 2 exact halves
-    // find the shared letter
-    // count its priority
-    
-    let counter = 0;
-    split.forEach((item) => {
-        const ruckparts = splitAt(item.length/2, item);
-        const overlap = getOverlap(ruckparts[0], ruckparts[1]);
+    let prioCounter = 0;
+    const groupedBy3 = groupByN(3, split);
+    groupedBy3.forEach(group => {
+        let overlap = getOverlap(group[0], group[1]);
+        overlap = getOverlap(overlap.join(''), group[2])[0];
         const priority = getPriority(overlap);
-        counter += priority;
+        prioCounter += priority;
     });
 
-    console.log('Answer 1 is ', counter);
+    console.log('Answer 2 is ', prioCounter);
 
 } catch (err) {
   console.error('Error! ', err);
