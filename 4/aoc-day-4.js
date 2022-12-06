@@ -2,85 +2,25 @@ const fs = require('fs');
 var _=require('lodash'); 
 
 // inclusive of first and last
-const getNumCount = (start, end) => {
-    let count = 0;
+const getNumbers = (start, end) => {
+    const countArr = [];
     for (let i = start; i <= end; i++) {
-        count++;
+        countArr.push(i);
     }
 
-    return count;
+    return countArr;
 };
 
-const isEncased = (rangeAstart, rangeBstart, rangeAend, rangeBend) => {
-    // get counts of each
-    const aCount = getNumCount(rangeAstart, rangeAend);
-    const bCount = getNumCount(rangeBstart, rangeBend);
+const isOverlap = (rangeAstart, rangeBstart, rangeAend, rangeBend) => {
+    // if starts are teh same, return true
+    // take either
+    // loop over it
+    // compare against first number from other
+    const bNumbers = getNumbers(rangeBstart, rangeBend);
 
-    // console.log({ aCount, bCount });
-
-    // if they're equal, and they're not the same, not encased
-    if (aCount === bCount) {
-        // if they are the same, return true
-        // console.log('returning ', rangeAstart === rangeBstart);
-        return rangeAstart === rangeBstart;
-    } 
-
-    
-
-
-    // one is longer than the other. start with one with lower first count
-    const getIsAstart = () => {
-        // if they have the same start, take the larger one
-        if (rangeAstart === rangeBstart) {
-            return aCount > bCount;
-        }
-
-        return rangeAstart < rangeBstart;
-    };
-
-    const aStart = getIsAstart();
-
-    const startAt = aStart ? rangeAstart : rangeBstart;
-    const endAt = aStart ? rangeAend : rangeBend;
-
-    console.log({
-        aStart,
-        startAt,
-        endAt,
-    });
-
-    // at this point they're not equal lengths and
-    // don't start together
-
-    let triggerInner = false;
-    for (let i = Number(startAt); i <= endAt; i++) {
-        // start with lower number. 
-        // increment by one.
-        // console.log({ i });
-
-        // is aStart
-            // if we hit B start, start counter
-                // if we hit B end before end of loop, return true
-        if (aStart) {
-            if (i === rangeBstart) {
-                triggerInner = true;
-            }
-
-            if (i === rangeBend && triggerInner) {
-                return true;
-            }
-        } else {
-        // is bStart
-            // if we hit A start, start counter
-                // if we hit A end before end of loop, return true
-                if (i === rangeAstart) {
-                    triggerInner = true;
-                }
-                
-                console.log({ triggerInner, rangeAend, i });
-            if (i === rangeAend && triggerInner) {
-                return true;
-            }
+    for (let i = rangeAstart; i <= rangeAend; i++) {
+        if (bNumbers.find(bn => bn === i)) {
+            return true;
         }
     }
 
@@ -104,25 +44,14 @@ try {
         rangeBstart = Number(rangeBstart);
         rangeBend = Number(rangeBend);
 
-        const encased = isEncased(rangeAstart, rangeBstart, rangeAend, rangeBend);
+        const overlapped = isOverlap(rangeAstart, rangeBstart, rangeAend, rangeBend);
 
-        if (encased) {
+        if (overlapped) {
             counter++;
         }
-
-        console.log({
-            item,
-            rangeAshort,
-            rangeBshort,
-            rangeAstart,
-            rangeAend,
-            rangeBstart,
-            rangeBend,
-            encased,
-        });
     })
 
-    console.log('Answer 1 is ', counter);
+    console.log('Answer 2 is ', counter);
 
 } catch (err) {
   console.error('Error! ', err);
